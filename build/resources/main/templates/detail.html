@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상세글 보기</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        #editarea {
+            display: none;
+        }
+
+    </style>
+    <script th:inline="javascript">
+
+        function showEdit() {
+            $('#editarea').show();
+            let username = [[${post.username}]].trim();
+            let title = [[${post.title}]].trim();
+            let content = [[${post.content}]].trim();
+
+            $('#username1').val(username);
+            $('#title1').val(title);
+            $('#content1').val(content);
+        }
+
+        function hideEdit() {
+            $('#editarea').hide();
+        }
+
+        function checkPassword() {
+            let id = [[${post.id}]];
+            let password = $('#password1').val();
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/posts/check',
+                data : {id, password},
+                success: function(result) {
+                    if(result === true){
+                        alert("비밀번호가 일치합니다.")
+                        $('#submitBtn').attr('disabled', false);
+
+                    }
+                    else{
+                        alert("비밀번호가 일치하지 않습니다");
+                    }
+                }
+            })
+        }
+
+        function submitEdit() {
+            let username = $('#username1').val();
+            let title = $('#title1').val();
+            let content = $('#content1').val();
+            let id = [[${post.id}]];
+
+            let data = {"username" : username, "title" : title, "content" : content};
+
+            $.ajax({
+                type: "PUT",
+                url: `/api/posts/${id}`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    alert('메시지 변경에 성공하였습니다.');
+                    window.location.reload();
+                }
+            });
+        }
+``
+    </script>
+</head>
+<body>
+    <h1>상세 글 내용입니다.</h1> <br>
+
+    <div id="info">
+<!--        <input type="hidden" name="id" th:value="${id}">-->
+        <h2 th:text="${post.username}" th:id="username"></h2>
+        <h1 th:text="${post.title}" th:id="title"></h1>
+        <h2 th:text="${post.content}" th:id="content"></h2>
+        <h3 th:text="${post.createdAt}" th:id="createdAt"></h3>
+        <h3 th:text="${post.modifiedAt}" th:id="modifiedAt"></h3>
+<!--    <h1 th:text="${post.password}"></h1>-->
+        <div>
+            <button class="button is-dark" onclick="showEdit()">수정하기</button>
+        </div>
+    </div>
+
+    <div id="editarea">
+        <div class="field">
+            <label class="label">사용자명</label>
+            <div class="control">
+                <input class="input" id="username1" type="text" placeholder="사용자명을 입력하세요">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">제목</label>
+            <div class="control">
+                <input class="input" id="title1" type="text" placeholder="제목을 입력하세요">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">글 내용</label>
+            <div class="control">
+                <textarea class="textarea" id="content1" placeholder="내용을 입력하세요"></textarea>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">비밀번호</label>
+            <div class="control">
+                <input class="input" id="password1" type="text" placeholder="설정한 비밀번호를 입력하세요">
+                <button class="button is-dark" onclick="checkPassword()">비밀번호 검증</button>
+            </div>
+        </div>
+
+        <button class="button is-dark" id="submitBtn" onclick="submitEdit()" disabled>수정하기!</button>
+<!--        <input type="submit" class="btn btn-outline-primary mr-2" value="수정" disabled>-->
+        <button class="button is-link" onclick="hideEdit()">취소</button>
+    </div>
+
+    <a href="/index.html">전체 글 보기</a>
+
+</body>
+</html>
